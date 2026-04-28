@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solomone Somani</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fbfaf7;
+    --bg2: #f3f1ec;
+    --card: #ffffff;
+    --text: #14130f;
+    --text2: #5c5950;
+    --text3: #8a877e;
+    --accent: #1d4ed8;
+    --accent2: #b91c1c;
+    --green: #15803d;
+    --border: #e5e2da;
+    --border2: #d6d2c6;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  [data-theme="dark"] {
+    --bg: #0e0d0b;
+    --bg2: #181714;
+    --card: #1c1b18;
+    --text: #edeae3;
+    --text2: #9a9790;
+    --text3: #636059;
+    --accent: #5b9cf6;
+    --accent2: #f07070;
+    --green: #3ecf6e;
+    --border: #262420;
+    --border2: #312e2a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    background-image: radial-gradient(circle at 1px 1px, rgba(20,19,15,0.04) 1px, transparent 0);
+    background-size: 24px 24px;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  [data-theme="dark"] body {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.025) 1px, transparent 0);
+  }
+
+  #geo-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav, main, footer { position: relative; z-index: 1; }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(251,250,247,0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 clamp(1.25rem, 4vw, 3rem);
+    height: 56px;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  [data-theme="dark"] nav { background: rgba(14,13,11,0.88); }
+
+  .nav-left { display: flex; align-items: center; gap: 1.75rem; }
+
+  .nav-name {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    transition: color 0.15s;
+  }
+
+  .nav-name::before { content: "▸ "; color: var(--accent); }
+
+  .nav-links { display: flex; gap: 1.75rem; list-style: none; }
+
+  .nav-links a {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    letter-spacing: 0.03em;
+  }
+
+  .theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+  .theme-toggle .ti { font-size: 0.85rem; line-height: 1; }
+
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 5vw, 2rem);
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 160px;
+    gap: 2.5rem;
+    align-items: start;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  .hero-photo {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border2);
+    background: var(--bg2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 0.65rem; color: var(--text3);
+    text-align: center; line-height: 1.4; padding: 0.5rem;
+  }
+
+  img.hero-photo { padding: 0; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--green);
+    background: #dcfce7; border: 1px solid #bbf7d0;
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 1.5rem;
+  }
+
+  [data-theme="dark"] .status-badge {
+    background: rgba(62,207,110,0.1);
+    border-color: rgba(62,207,110,0.25);
+  }
+
+  .status-badge::before {
+    content: ""; width: 6px; height: 6px;
+    border-radius: 50%; background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 6vw, 3.4rem);
+    font-weight: 400; line-height: 1.05;
+    letter-spacing: -0.02em; margin-bottom: 1rem;
+  }
+
+  .hero h1 .accent { font-style: italic; color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.05rem; color: var(--text2);
+    margin-bottom: 1.5rem; max-width: 600px; line-height: 1.55;
+  }
+
+  .hero-meta {
+    display: flex; flex-wrap: wrap; gap: 0 1.5rem;
+    font-family: var(--mono); font-size: 0.78rem;
+    color: var(--text3); margin-bottom: 1.5rem;
+  }
+
+  .hero-meta span strong { color: var(--text); font-weight: 500; }
+
+  .hero-links { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+  .hero-links a {
+    font-family: var(--mono); font-size: 0.74rem;
+    color: var(--text); text-decoration: none;
+    border: 1px solid var(--border2);
+    padding: 5px 11px; border-radius: 4px;
+    transition: all 0.15s; background: var(--card);
+  }
+
+  .hero-links a:hover {
+    border-color: var(--accent); color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .hero-links a::before { content: "↗ "; opacity: 0.5; }
+
+  section {
+    margin-bottom: 3.5rem; opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+
+  section:nth-child(2) { animation-delay: 0.05s; }
+  section:nth-child(3) { animation-delay: 0.10s; }
+  section:nth-child(4) { animation-delay: 0.15s; }
+  section:nth-child(5) { animation-delay: 0.20s; }
+  section:nth-child(6) { animation-delay: 0.25s; }
+
+  .section-header {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 1.5rem; padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  h2 {
+    font-family: var(--serif); font-size: 1.6rem;
+    font-weight: 400; letter-spacing: -0.01em;
+  }
+
+  .section-num {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--text3); letter-spacing: 0.04em;
+  }
+
+  .shipping-card {
+    background: linear-gradient(135deg, var(--card) 0%, var(--bg2) 100%);
+    border: 1px solid var(--border2);
+    border-radius: 8px; padding: 1.5rem 1.75rem;
+    position: relative; overflow: hidden;
+  }
+
+  .shipping-card::before {
+    content: ""; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; background: var(--accent);
+  }
+
+  .shipping-meta {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--accent);
+    letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+
+  .shipping-title {
+    font-family: var(--serif); font-size: 1.5rem;
+    font-weight: 400; margin-bottom: 0.5rem; line-height: 1.2;
+  }
+
+  .shipping-desc { color: var(--text2); font-size: 0.95rem; margin-bottom: 1rem; }
+  .shipping-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+  .stack-pill {
+    font-family: var(--mono); font-size: 0.7rem;
+    background: var(--bg2); color: var(--text2);
+    border: 1px solid var(--border); padding: 2px 8px; border-radius: 3px;
+  }
+
+  .builds-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+
+  .build-card {
+    background: var(--card); border: 1px solid var(--border);
+    padding: 1.1rem 1.25rem; border-radius: 6px; transition: all 0.2s ease;
+  }
+
+  .build-card:hover {
+    border-color: var(--text2); transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(20,19,15,0.06);
+  }
+
+  [data-theme="dark"] .build-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+
+  .build-name {
+    font-weight: 600; font-size: 0.98rem; letter-spacing: -0.01em;
+    margin-bottom: 0.4rem;
+  }
+
+  .build-stat {
+    font-family: var(--mono); font-size: 0.65rem; color: var(--accent2);
+    letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 0.5rem; font-weight: 500;
+  }
+
+  .build-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.55; }
+
+  .build-stack { margin-top: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .build-stack .stack-pill { font-size: 0.65rem; padding: 1px 6px; }
+
+  .timeline-item {
+    display: grid; grid-template-columns: 100px 1fr;
+    gap: 1.25rem; padding: 0.5rem 0; margin-bottom: 0.4rem; align-items: baseline;
+  }
+
+  .timeline-date {
+    font-family: var(--mono); font-size: 0.72rem;
+    color: var(--text3); letter-spacing: 0.02em; text-transform: uppercase;
+  }
+
+  .timeline-content { font-size: 0.92rem; line-height: 1.55; }
+  .timeline-content strong { font-weight: 600; }
+  .timeline-content em { font-style: normal; color: var(--accent); }
+
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: 0.62rem;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 1px 6px; border-radius: 3px; margin-right: 6px;
+    font-weight: 500; vertical-align: 1px;
+  }
+
+  .tag-ship     { background: #dbeafe; color: #1d4ed8; }
+  .tag-research { background: #fef3c7; color: #92400e; }
+  .tag-talk     { background: #f3e8ff; color: #6b21a8; }
+  .tag-win      { background: #fee2e2; color: #b91c1c; }
+
+  [data-theme="dark"] .tag-ship     { background: rgba(91,156,246,0.15); color: #7ab3f8; }
+  [data-theme="dark"] .tag-research { background: rgba(251,191,36,0.12); color: #fbbf24; }
+  [data-theme="dark"] .tag-talk     { background: rgba(167,139,250,0.15); color: #a78bfa; }
+  [data-theme="dark"] .tag-win      { background: rgba(240,112,112,0.15); color: #f07070; }
+
+  .research-item {
+    border-left: 2px solid var(--border2);
+    padding: 0.75rem 0 0.75rem 1.25rem;
+    margin-bottom: 1rem; transition: border-color 0.2s;
+  }
+
+  .research-item:hover { border-left-color: var(--accent); }
+
+  .research-venue {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--accent2);
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.25rem;
+  }
+
+  .research-title {
+    font-size: 0.96rem; font-weight: 500; margin-bottom: 0.25rem; line-height: 1.4;
+  }
+
+  .research-desc { font-size: 0.85rem; color: var(--text2); line-height: 1.55; }
+
+  .recog-list { list-style: none; columns: 2; column-gap: 2rem; }
+
+  .recog-list li {
+    break-inside: avoid; padding: 0.4rem 0;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.88rem; display: flex;
+    justify-content: space-between; gap: 0.5rem; align-items: baseline;
+  }
+
+  .recog-list li span:first-child { color: var(--text); }
+  .recog-list li span:last-child {
+    font-family: var(--mono); font-size: 0.7rem; color: var(--text3); flex-shrink: 0;
+  }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem clamp(1.25rem, 4vw, 3rem);
+    font-family: var(--mono); font-size: 0.72rem; color: var(--text3);
+    display: flex; justify-content: space-between; letter-spacing: 0.02em;
+  }
+
+  footer a { color: var(--text2); text-decoration: none; }
+  footer a:hover { color: var(--accent); }
+
+  @media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; gap: 1.5rem; }
+    .hero-photo { width: 110px; height: 110px; }
+    .builds-grid { grid-template-columns: 1fr; }
+    .recog-list { columns: 1; }
+    .timeline-item { grid-template-columns: 1fr; gap: 0.2rem; }
+    .nav-links { gap: 0.85rem; }
+    .nav-links a { font-size: 0.7rem; }
+    footer { flex-direction: column; gap: 0.4rem; }
+    .tl { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="geo-canvas"></canvas>
+
+<nav>
+  <div class="nav-left">
+    <a href="#" class="nav-name">solomone.dev</a>
+    <ul class="nav-links">
+      <li><a href="#now">Now</a></li>
+      <li><a href="#builds">Builds</a></li>
+      <li><a href="#research">Research</a></li>
+      <li><a href="#timeline">Timeline</a></li>
+    </ul>
+  </div>
+  <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+    <span class="ti">◑</span><span class="tl">light</span>
+  </button>
+</nav>
+
+<main>
+
+  <div class="hero" id="hero">
+    <div class="hero-text">
+      <span class="status-badge">Shipping conversational AI at Insulytics</span>
+      <h1>Building tools where <span class="accent">data</span> meets the real world.</h1>
+      <p class="hero-sub">I work at the intersection of applied AI, data infrastructure, and computational biology. I like shipping things: internal tools, ML pipelines, research code that actually finds something. Currently building a natural-language analytics layer for a B2B SaaS, running an independent transcriptomics study on the side, and teaching venture-building to ~80 students.</p>
+      <div class="hero-meta">
+        <span><strong>IMSA '27</strong></span>
+        <span>Naperville, IL</span>
+        <span>ACT 35</span>
+        <span>Python · SQL · Java · C++</span>
+      </div>
+      <div class="hero-links">
+        <a href="https://github.com/solosom" target="_blank" rel="noopener noreferrer">github</a>
+        <a href="https://www.linkedin.com/in/solomone-somani/" target="_blank" rel="noopener noreferrer">linkedin</a>
+        <a href="mailto:solosomani1@gmail.com">email</a>
+        <a href="#research">papers</a>
+      </div>
+    </div>
+    <img src="photo.jpg" alt="Solomone Somani" class="hero-photo" onerror="this.outerHTML='&lt;div class=&quot;hero-photo&quot;&gt;photo.jpg&lt;/div&gt;'">
+  </div>
+
+  <section id="now">
+    <div class="section-header">
+      <h2>Currently building</h2>
+      <span class="section-num">/01</span>
+    </div>
+    <div class="shipping-card">
+      <div class="shipping-meta">Insulytics Inc. · Data &amp; AI Intern</div>
+      <div class="shipping-title">A conversational analytics layer for insurance data.</div>
+      <div class="shipping-desc">Building a client-facing analytics dashboard with a natural-language query interface, so non-technical users can ask questions of structured datasets and get back charts, tables, and DAX-driven insights. Working through the real product tradeoffs: data security boundaries, latency, cost-per-query, and what to do when the LLM gets the schema wrong.</div>
+      <div class="shipping-stack">
+        <span class="stack-pill">Power BI</span>
+        <span class="stack-pill">DAX</span>
+        <span class="stack-pill">SQL</span>
+        <span class="stack-pill">Azure</span>
+        <span class="stack-pill">LLM integration</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="builds">
+    <div class="section-header">
+      <h2>Builds &amp; projects</h2>
+      <span class="section-num">/02</span>
+    </div>
+    <div class="builds-grid">
+      <div class="build-card">
+        <div class="build-name">BCC Expression Pipeline</div>
+        <div class="build-stat">16k genes · 13 hits · solo</div>
+        <div class="build-desc">End-to-end bioinformatics pipeline for differential expression analysis on a basal cell carcinoma dataset. Found 13 highly upregulated genes; 10 of which weren't flagged in prior published work, including a candidate that may explain BCC's slow-growth phenotype.</div>
+        <div class="build-stack">
+          <span class="stack-pill">Python</span><span class="stack-pill">R</span><span class="stack-pill">bioinformatics</span>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-name">Sandalwood Transcriptomics</div>
+        <div class="build-stat">9 climatic regions · in progress</div>
+        <div class="build-desc">Computational analysis of gene expression variation in Indian sandalwood across climatic gradients. Working under a Cornell-trained PhD biostatistician (genomics company founder). Manuscript planned for Summer 2026 submission.</div>
+        <div class="build-stack">
+          <span class="stack-pill">Python</span><span class="stack-pill">RNA-seq</span><span class="stack-pill">stats</span>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-name">Mars Habitat Proposal</div>
+        <div class="build-stat">2nd national · top 5 of 60+</div>
+        <div class="build-desc">15-page technical proposal for a sustainable Mars habitat using &gt;80% in-situ resources. Mentored by 3 Lockheed Martin engineers, then pitched to an executive panel for the final round.</div>
+        <div class="build-stack">
+          <span class="stack-pill">systems design</span><span class="stack-pill">technical writing</span>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-name">LEAD Entrepreneurship</div>
+        <div class="build-stat">Co-Chair · 78 students · 12 facilitators</div>
+        <div class="build-desc">Designing and teaching curriculum for a venture-development program across 6 classrooms. Student ventures presented at the SLX symposium. Equal parts product design, ops, and pedagogy.</div>
+        <div class="build-stack">
+          <span class="stack-pill">curriculum</span><span class="stack-pill">teaching</span><span class="stack-pill">ops</span>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-name">TALENT Curriculum</div>
+        <div class="build-stat">Lead · accredited · $6k awarded</div>
+        <div class="build-desc">Leading development of a dual-credit entrepreneurship curriculum that secured university accreditation. Supports summer programs and a statewide pitch competition with $6,000 in prizes.</div>
+        <div class="build-stack">
+          <span class="stack-pill">curriculum</span><span class="stack-pill">accreditation</span>
+        </div>
+      </div>
+      <div class="build-card">
+        <div class="build-name">It's Our Future · Climate Org</div>
+        <div class="build-stat">2026 Co-Chair · 26 schools · 100+ students</div>
+        <div class="build-desc">Co-Chair of Illinois's first Youth Climate Justice Summit. Oversee 4 subcommittees and a follow-up initiative tracking school-level climate action plan implementation.</div>
+        <div class="build-stack">
+          <span class="stack-pill">org-building</span><span class="stack-pill">events</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="research">
+    <div class="section-header">
+      <h2>Research output</h2>
+      <span class="section-num">/03</span>
+    </div>
+    <div class="research-item">
+      <div class="research-venue">Dermatologic Surgery · Peer-reviewed · PubMed-indexed</div>
+      <div class="research-title">First-author clinical case report.</div>
+      <div class="research-desc">Led literature review, manuscript writing, and submission with a dermatology resident and clinical team. First author.</div>
+    </div>
+    <div class="research-item">
+      <div class="research-venue">EADV 2026 · Abstract submitted · Manuscript in progress</div>
+      <div class="research-title">Differential expression markers of slow-growth phenotype in basal cell carcinoma.</div>
+      <div class="research-desc">Independent computational study. Submitted abstract to the European Academy of Dermatology &amp; Venereology; drafting full manuscript for peer-reviewed submission.</div>
+    </div>
+    <div class="research-item">
+      <div class="research-venue">In preparation · Summer 2026</div>
+      <div class="research-title">Transcriptomic adaptation in Indian sandalwood across climatic gradients.</div>
+      <div class="research-desc">Computational analysis of gene expression variation across 9 regions, with a Cornell-trained PhD biostatistician.</div>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="section-header">
+      <h2>Timeline</h2>
+      <span class="section-num">/04</span>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2026</div>
+      <div class="timeline-content"><span class="tag tag-ship">Ship</span>Building conversational AI for insurance analytics at <em>Insulytics Inc.</em></div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2026</div>
+      <div class="timeline-content"><span class="tag tag-talk">Selected</span>Student delegate to <em>UN COP31</em>: 1 of 4 from a 40,000-person conference.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2026</div>
+      <div class="timeline-content"><span class="tag tag-research">Submit</span>Abstract submitted to <em>EADV 2026</em> on basal cell carcinoma transcriptomics.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2025</div>
+      <div class="timeline-content"><span class="tag tag-research">Publish</span>First-author paper out in <em>Dermatologic Surgery</em> (PubMed-indexed).</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2025</div>
+      <div class="timeline-content"><span class="tag tag-win">Win</span><em>2nd nationally</em> at the Lockheed Martin Mars Mission Challenge: top 5 of 60+ teams.</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2025</div>
+      <div class="timeline-content"><span class="tag tag-talk">Selected</span><em>Global Leadership Program, India</em> (~300 of 1,600 applicants).</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">2025</div>
+      <div class="timeline-content"><span class="tag tag-ship">Ship</span>Started independent <em>BCC bioinformatics</em> pipeline; began sandalwood transcriptomics work.</div>
+    </div>
+  </section>
+
+  <section id="recognition">
+    <div class="section-header">
+      <h2>Recognition</h2>
+      <span class="section-num">/05</span>
+    </div>
+    <ul class="recog-list">
+      <li><span>Dermatologic Surgery, First Author</span><span>2025</span></li>
+      <li><span>Lockheed Martin Mars Mission, 2nd National</span><span>2025</span></li>
+      <li><span>National History Day, 1st Place Documentary (Regional)</span><span>2024</span></li>
+      <li><span>AP Scholar with Distinction</span><span>2025</span></li>
+      <li><span>National Spanish Exam: Bronze, Silver, HM</span><span>2023–25</span></li>
+      <li><span>COP31 Delegate, UN Climate Conference</span><span>2026</span></li>
+      <li><span>Global Leadership Program, India</span><span>2025</span></li>
+      <li><span>EADV 2026, Abstract Accepted</span><span>2026</span></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  <span>solomone somani · imsa '27 · naperville, il</span>
+  <span><a href="mailto:solosomani1@gmail.com">solosomani1@gmail.com</a></span>
+</footer>
+
+<script>
+// ── THEME TOGGLE ───────────────────────────────────────────────────────────────
+const html  = document.documentElement;
+const btn   = document.getElementById('theme-toggle');
+const ti    = btn.querySelector('.ti');
+const tl    = btn.querySelector('.tl');
+
+function applyTheme(t) {
+  html.setAttribute('data-theme', t);
+  localStorage.setItem('theme', t);
+  ti.textContent = t === 'dark' ? '◐' : '◑';
+  tl.textContent = t === 'dark' ? 'dark' : 'light';
+}
+
+btn.addEventListener('click', () => {
+  applyTheme(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+});
+
+applyTheme(localStorage.getItem('theme') || 'light');
+
+
+// ── GEOMETRIC CANVAS ───────────────────────────────────────────────────────────
+const canvas = document.getElementById('geo-canvas');
+const ctx    = canvas.getContext('2d');
+
+let W = 0, H = 0;
+let scrollProg = 0, smoothProg = 0;
+let tick = 0;
+let activeSec = 0;
+
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize);
+resize();
+
+window.addEventListener('scroll', () => {
+  const max = Math.max(1, document.body.scrollHeight - window.innerHeight);
+  scrollProg = window.scrollY / max;
+  updateActiveSection();
+}, { passive: true });
+
+// Track which section is active based on scroll position
+const SEC_IDS    = ['hero','now','builds','research','timeline'];
+const SEC_SHAPES = ['circle','square','diamond','triangle','pentagon'];
+
+function updateActiveSection() {
+  // A section becomes active once its top edge passes 45% down the viewport
+  const trigger = window.scrollY + window.innerHeight * 0.45;
+  let active = 0;
+  SEC_IDS.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (el && el.offsetTop <= trigger) active = i;
+  });
+  activeSec = active;
+}
+
+updateActiveSection();
+
+// Colors that respect current theme
+function ink(a)    { return html.getAttribute('data-theme')==='dark' ? `rgba(237,234,227,${a})` : `rgba(20,19,15,${a})`; }
+function acc(a)    { return html.getAttribute('data-theme')==='dark' ? `rgba(91,156,246,${a})`  : `rgba(29,78,216,${a})`; }
+
+// ── Left margin: section-progress spine ───────────────────────────────────────
+function drawLeft(margin) {
+  if (margin < 64) return;
+  const cx   = margin * 0.44;
+  const topY = H * 0.15;
+  const botY = H * 0.85;
+  const n    = SEC_SHAPES.length;
+  const step = (botY - topY) / (n - 1);
+
+  // Background spine
+  ctx.strokeStyle = ink(0.1); ctx.lineWidth = 0.75; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(cx, topY); ctx.lineTo(cx, botY); ctx.stroke();
+
+  // Progress fill
+  ctx.strokeStyle = acc(0.38); ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cx, topY); ctx.lineTo(cx, topY + (botY - topY) * scrollProg); ctx.stroke();
+
+  for (let i = 0; i < n; i++) {
+    const y       = topY + step * i;
+    const isAct   = i === activeSec;
+    const isPast  = i < activeSec;
+    const sz      = isAct ? 5.5 : 3.5;
+
+    ctx.strokeStyle = isAct ? acc(1)    : ink(isPast ? 0.35 : 0.18);
+    ctx.fillStyle   = isAct ? acc(1)    : ink(isPast ? 0.22 : 0);
+    ctx.lineWidth   = isAct ? 1.3 : 0.8;
+    ctx.setLineDash([]);
+
+    ctx.save(); ctx.translate(cx, y);
+    drawShape(SEC_SHAPES[i], sz, isAct || isPast);
+    ctx.restore();
+
+    // Short horizontal tick
+    ctx.strokeStyle = isAct ? acc(0.5) : ink(0.08);
+    ctx.lineWidth = 0.6;
+    ctx.beginPath();
+    ctx.moveTo(cx + sz + 3, y);
+    ctx.lineTo(cx + sz + (isAct ? 14 : 7), y);
+    ctx.stroke();
+  }
+}
+
+function drawShape(shape, sz, fill) {
+  ctx.beginPath();
+  switch(shape) {
+    case 'circle':
+      ctx.arc(0, 0, sz, 0, Math.PI*2); break;
+    case 'square':
+      ctx.rect(-sz*0.9, -sz*0.9, sz*1.8, sz*1.8); break;
+    case 'diamond':
+      ctx.moveTo(0,-sz*1.35); ctx.lineTo(sz,0); ctx.lineTo(0,sz*1.35); ctx.lineTo(-sz,0); ctx.closePath(); break;
+    case 'triangle':
+      for(let j=0;j<3;j++){const a=j*(Math.PI*2/3)-Math.PI/2; j===0?ctx.moveTo(Math.cos(a)*sz*1.25,Math.sin(a)*sz*1.25):ctx.lineTo(Math.cos(a)*sz*1.25,Math.sin(a)*sz*1.25);} ctx.closePath(); break;
+    case 'pentagon':
+      for(let j=0;j<5;j++){const a=j*(Math.PI*2/5)-Math.PI/2; j===0?ctx.moveTo(Math.cos(a)*sz*1.2,Math.sin(a)*sz*1.2):ctx.lineTo(Math.cos(a)*sz*1.2,Math.sin(a)*sz*1.2);} ctx.closePath(); break;
+    case 'hexagon':
+      for(let j=0;j<6;j++){const a=j*(Math.PI/3); j===0?ctx.moveTo(Math.cos(a)*sz*1.15,Math.sin(a)*sz*1.15):ctx.lineTo(Math.cos(a)*sz*1.15,Math.sin(a)*sz*1.15);} ctx.closePath(); break;
+  }
+  if (fill) ctx.fill();
+  ctx.stroke();
+}
+
+// ── Right margin: evolving abstract geometry ───────────────────────────────────
+function drawRight(startX, margin) {
+  if (margin < 64) return;
+  const cx  = startX + margin * 0.5;
+  const cy  = H * 0.33;   // main cluster
+  const cy2 = H * 0.63;   // constellation
+  const p   = smoothProg;
+  const t   = tick;
+
+  ctx.setLineDash([]);
+
+  // 1. Outer ring — grows with scroll
+  const ringR = 18 + p * 54;
+  ctx.strokeStyle = ink(0.07 + p*0.04); ctx.lineWidth = 0.7;
+  ctx.beginPath(); ctx.arc(cx, cy, ringR, 0, Math.PI*2); ctx.stroke();
+
+  // 2. Rotating triangle — fades in past p=0.06
+  if (p > 0.05) {
+    const alpha = Math.min((p-0.05)/0.18, 1);
+    const angle = p * Math.PI * 1.2 + t * 0.00018;
+    const r     = 28 + p * 28;
+    ctx.strokeStyle = ink(alpha * 0.10); ctx.lineWidth = 0.75;
+    ctx.beginPath();
+    for(let i=0;i<3;i++){const a=angle+i*(Math.PI*2/3); i===0?ctx.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r):ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);}
+    ctx.closePath(); ctx.stroke();
+  }
+
+  // 3. Counter-rotating square — fades in past p=0.26
+  if (p > 0.24) {
+    const alpha = Math.min((p-0.24)/0.2, 1);
+    const angle = -p * Math.PI * 0.75 + t * 0.00012;
+    const r     = 42 + p * 18;
+    ctx.strokeStyle = ink(alpha * 0.08); ctx.lineWidth = 0.7;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle);
+    ctx.strokeRect(-r, -r, r*2, r*2);
+    ctx.restore();
+  }
+
+  // 4. Center dot + crosshairs — always present
+  ctx.fillStyle = ink(0.22);
+  ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = ink(0.07); ctx.lineWidth = 0.6;
+  const hl = 8 + p*6;
+  ctx.beginPath();
+  ctx.moveTo(cx-hl,cy); ctx.lineTo(cx+hl,cy);
+  ctx.moveTo(cx,cy-hl); ctx.lineTo(cx,cy+hl);
+  ctx.stroke();
+
+  // 5. Dot constellation — grows in with scroll
+  const dotCoords = [
+    [0,0],[18,-12],[-16,-14],[22,10],[-20,8],[6,22],[-8,24],[30,-2],[-28,2],[14,-28],[-12,-30]
+  ];
+  const visible = Math.min(Math.floor(p * dotCoords.length * 1.4) + 1, dotCoords.length);
+  const spread  = 0.78 + p * 0.32;
+  const breathe = Math.sin(t * 0.0008) * 2.5;
+
+  ctx.fillStyle = ink(0.17);
+  dotCoords.slice(0, visible).forEach(([dx, dy], i) => {
+    ctx.beginPath();
+    ctx.arc(cx + dx*spread, cy2 + dy*spread + breathe, i===0 ? 2.5 : 1.5, 0, Math.PI*2);
+    ctx.fill();
+  });
+
+  // Lines between constellation dots — appear past p=0.44
+  if (p > 0.42 && visible > 4) {
+    const la = Math.min((p-0.42)/0.25, 1) * 0.09;
+    ctx.strokeStyle = ink(la); ctx.lineWidth = 0.55;
+    [[0,1],[0,2],[1,3],[2,4],[3,5],[4,6],[1,7],[2,8],[0,9],[0,10]].forEach(([a,b]) => {
+      if (a < visible && b < visible) {
+        ctx.beginPath();
+        ctx.moveTo(cx+dotCoords[a][0]*spread, cy2+dotCoords[a][1]*spread+breathe);
+        ctx.lineTo(cx+dotCoords[b][0]*spread, cy2+dotCoords[b][1]*spread+breathe);
+        ctx.stroke();
+      }
+    });
+  }
+
+  // 6. Fine grid — materialises past p=0.63, wide margins only
+  if (p > 0.62 && margin > 110) {
+    const ga = Math.min((p-0.62)/0.28, 1) * 0.044;
+    ctx.strokeStyle = ink(ga); ctx.lineWidth = 0.5;
+    const gs=14, gx0=startX+18, gx1=startX+margin-18, gy0=H*0.12, gy1=H*0.88;
+    for(let x=gx0;x<=gx1;x+=gs){ctx.beginPath();ctx.moveTo(x,gy0);ctx.lineTo(x,gy1);ctx.stroke();}
+    for(let y=gy0;y<=gy1;y+=gs){ctx.beginPath();ctx.moveTo(gx0,y);ctx.lineTo(gx1,y);ctx.stroke();}
+  }
+
+  // 7. Accent arc sweep — appears near bottom of page
+  if (p > 0.82) {
+    const aa = Math.min((p-0.82)/0.12, 1) * 0.28;
+    ctx.strokeStyle = acc(aa); ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringR * 1.38, -Math.PI*0.45, Math.PI*0.45);
+    ctx.stroke();
+  }
+}
+
+// ── Render loop ────────────────────────────────────────────────────────────────
+function frame() {
+  ctx.clearRect(0, 0, W, H);
+  smoothProg += (scrollProg - smoothProg) * 0.038;
+  tick++;
+
+  const margin = Math.max(0, (W - 880) / 2);
+  drawLeft(margin);
+  drawRight(W - margin, margin);
+
+  requestAnimationFrame(frame);
+}
+
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
